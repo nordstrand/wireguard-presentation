@@ -4,6 +4,8 @@ Slides and manuscript for a [Sozi](https://github.com/sozi-projects/Sozi)-based 
 [JavaZone VR 2020](https://2020.javazone.no/vr-program) ([video](https://vimeo.com/459310996)) and
 [NDC Oslo 2020](https://ndcoslo.com/talk/lightning-talks-1/).
 
+ * [Presentation](https://nordstrand.github.io/wireguard-presentation/presentation.sozi.html)
+
 ## Abstract
 It’s more important than ever to use a personal VPN - both for personal internet privacy and for safely accessing your smart-home/IoT-stuff when your’re away from home. 
 
