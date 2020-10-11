@@ -1,0 +1,119 @@
+Hello everyone! My name is Jonas Nordstrand, and I work for SpareBank 1.
+
+Welcome to my talk about Do-It-Yourself security and privacy and how you can setup your very own VPN in 10 minutes. 
+
+I have to start with admitting that the title of the talk is a little bit of a lie.
+I plan to spend at least five full minutes of this 10 minute short lightning talk
+motivating this whole VPN thing so the rolling part will actually have the happen a bit faster than indicated! 
+
+So - no time to waste - lets get started!
+
+I suppose many of use has developed a much closer relationship with VPN technology during these troubled times than ever before. 
+
+==
+During the COVID crises remote working has become the new normal, and a key enabler has been
+VPN technology that make it possible for employees to securely access corporate networks from the comforts of home.
+
+Corporate VPN systems are often expensive, proprietary and complicated to setup and use. Typically one use a hard ware dongle
+or some other kind of second factor for authentication.
+
+This kind VPN deployment is _not_ the the topic of this talk.
+
+So - what _is_ the topic? Why would one interest oneself in using VPN technology in a more personal setting?
+I can think of at least two scenarios where a personal VPN makes a lot of sense:
+==
+#1
+Increased security and privacy for general browsing needs. E.G. when using a public WiFI network you'll always run the
+risk that the access point will snoop on, or even intercept and rewrite, your internet traffic. Even though most
+traffic by now is TLS encrypted from peer to peer but many areas of vulnerability still remain to this day. E.G. is name resolution
+through DNS still performed in clear text. Also the possibility of various TLS downgrade attacks.
+==
+A VPN will allow you to add an extra layer of security and tunnel your traffic securely through less trusted points on
+the net.
+==
+#2
+If you are a tinkerer and have some projects running at home home. E.G raspberry pi servers, ip cameras, NAS storage units connected to
+your home network an VPN is an excellent choice to "be at home" when you're on the go without involving any shady cloud services.
+
+This leads me to VPN:s. There are huge number more or less shady commercial  VPN services available. 
+Rather than putting your all your trust to one of them - there is a better option: run your _own_ private VPN service on your
+*own* server.
+==
+To accomplish the we will use Wireguard today.
+Wireguard is a modern piece of VPN software that is built in to the Linux kernel. Wireguard is not limited to Linux, there are
+client available for for Mac, Windows, iPhone and Android.
+
+Wireguard is surprisingly fast and easy to setup.
+
+==
+The configuration of Wireguard is based on public-private key cryptography. It's a bit like Github. You generate key pairs for your
+server and client and distribute the public key to other party. Hence later on can use that key to verify that you is really you.
+
+Let's started!
+
+==
+
+
+DEMO
+
+
+==
+
+The was all it is to is!
+This setup is working nicely but there _are_ some security related caveats with the setup here. For instance one could argue for that the 
+client private key should never have touched the server, I did all the keygen stuff server side out of convenience. Also, you might want to look into the 
+DNS-configuration of the client to prevent so called DNS leaks where DNS traffic bypasses the VPN.
+
+
+I'd like to encourage people to look into Wireguard if what you have seen appears enticing! I'll put a link to a good tutorial on the screen. Thank you!
+
+
+
+
+==
+
+Sætt upp droplet
+Kopiera ip
+
+# ssh root@ip
+apt update
+apt install -y wireguard
+
+wg --help
+wg genkey > server_private.key
+cat server_private.key | wg pubkey > server_public.key
+
+wg genkey > client_private.key
+cat client_private.key | wg pubkey > client_public.key
+
+vim /etc/wireguard/wg0.conf
+
+[Interface]
+Address = 192.168.100.10
+PrivateKey = wJ2xrHZ0gSdW/ugLr8ku7eHycV2fFiWWehpxoTmAYVE=
+ListenPort = 55555
+
+[Peer]
+PublicKey = osD6lBzmPhZwVKKixUSNXUSYjc//nL5tT1u/TZgMT0E=
+AllowedIPs = 192.168.100.11
+
+$ wg-quick up wg0
+$ wg
+$ sysctl net.ipv4.ip_forward=1
+$ iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE;
+
+$ vim client.conf
+
+[Interface]
+Address = 192.168.100.11
+PrivateKey = aHjHrTTSRqqTspVm6nhNJLZCSuKk1Vmqt9Ee+ysc21Y=
+DNS = 8.8.8.8
+
+[Peer]
+PublicKey = IJYfDJeuRgxWpbz7pMIQAtwsCPLaEIn3nuSeLLUZlHE=
+Endpoint = 167.99.204.58:55555
+AllowedIPs = 0.0.0.0/0
+
+$ apt install -y qrencode
+
+qrencode -t ansiutf8 < client.conf
